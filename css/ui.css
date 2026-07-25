@@ -1,0 +1,486 @@
+/* ui.css — player bars, panels, move list, engine info, modals, toast. */
+
+/* ------------------------------------------------------------ player bars */
+.player-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 46px;
+}
+
+.player-bar.active {
+  border-color: var(--accent);
+}
+
+.player-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thinking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  flex: none;
+}
+
+.player-bar.thinking .thinking-dot {
+  opacity: 1;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.captured-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cap-piece {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-left: -4px;
+}
+
+.cap-piece svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.material-diff {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.clock {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+}
+
+.clock.low {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ---------------------------------------------------------------- status */
+.status {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-height: 22px;
+}
+
+.status[data-kind="check"] {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.status[data-kind="end"] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------ engine panel */
+.engine-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.engine-panel.thinking .engine-status {
+  color: var(--accent);
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.engine-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stat-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.engine-pv {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pv-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -------------------------------------------------------------- move list */
+.move-list {
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 13.5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--canvas);
+  padding: 4px;
+}
+
+.move-list-empty {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 14px 0;
+  font-size: 13px;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 34px 1fr 1fr;
+  align-items: center;
+}
+
+.move-number {
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.move-cell {
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.move-cell:hover {
+  background: var(--accent-soft);
+}
+
+.move-cell.current {
+  background: var(--accent);
+  color: #fff;
+}
+
+.move-cell.empty {
+  cursor: default;
+}
+
+.glyph {
+  margin-left: 3px;
+  font-weight: 700;
+}
+
+.move-cell.inaccuracy .glyph {
+  color: var(--warning);
+}
+
+.move-cell.mistake .glyph {
+  color: var(--warning);
+}
+
+.move-cell.blunder .glyph {
+  color: var(--danger);
+}
+
+.move-cell.blunder:not(.current) {
+  background: rgba(212, 76, 71, 0.12);
+}
+
+.history-nav {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.nav-spacer {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------- actions */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.actions-grid .btn {
+  font-size: 12.5px;
+  padding: 6px 4px;
+}
+
+/* ----------------------------------------------------------------- graph */
+.eval-graph {
+  width: 100%;
+  height: 110px;
+  display: block;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 15, 0.5);
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  padding: 16px;
+}
+
+.modal[hidden] {
+  display: none; /* `display: flex` would otherwise override the hidden attribute */
+}
+
+.modal.open {
+  opacity: 1;
+}
+
+.modal-card {
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  width: min(440px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  transform: translateY(6px);
+  transition: transform 150ms ease;
+}
+
+.modal.open .modal-card {
+  transform: translateY(0);
+}
+
+.modal-card.compact {
+  width: min(340px, 100%);
+  text-align: center;
+}
+
+.modal-card h2 {
+  font-size: 17px;
+  margin-bottom: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.field > span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.field input[type="text"],
+.field select,
+.field textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  outline: none;
+}
+
+.field textarea {
+  font-family: var(--mono);
+  font-size: 12px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+}
+
+.field.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.field.checkbox span {
+  color: var(--text);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.modal-actions.left {
+  justify-content: flex-start;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.gameover-subtitle,
+.confirm-message {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.pgn-error {
+  color: var(--danger);
+  font-size: 13px;
+  min-height: 18px;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------- promotion */
+.promotion-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.promotion-choice {
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  padding: 6px;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.promotion-choice:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.promotion-choice svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------ toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%, 12px);
+  background: var(--text);
+  color: var(--canvas);
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+  z-index: 60;
+  max-width: min(90vw, 480px);
+  text-align: center;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 480px) {
+  .move-list {
+    max-height: 160px;
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .clock {
+    font-size: 15px;
+  }
+}

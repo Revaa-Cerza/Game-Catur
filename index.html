@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChessMaster — Offline Chess</title>
+  <meta name="description" content="A complete offline chess game with a real alpha-beta engine: all FIDE rules, five game modes, analysis, PGN/FEN, clocks and more." />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/ui.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark">♚</span>
+      <h1>ChessMaster</h1>
+    </div>
+    <div class="header-actions">
+      <button id="btn-new" class="btn primary">New game</button>
+      <button id="btn-sound" class="btn icon" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+      <button id="btn-theme" class="btn icon" title="Toggle dark mode" aria-label="Toggle dark mode">☽</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ==================== board column ==================== -->
+    <section class="board-column">
+      <div id="player-top" class="player-bar">
+        <div class="player-id">
+          <span id="name-top" class="player-name">Black</span>
+          <span class="thinking-dot" aria-hidden="true"></span>
+        </div>
+        <div id="captured-top" class="captured-row"></div>
+        <div id="clock-top" class="clock" hidden>5:00</div>
+      </div>
+
+      <div class="board-area">
+        <div id="eval-bar" class="eval-bar" title="Evaluation"></div>
+        <div id="board-wrap" class="board-wrap"></div>
+      </div>
+
+      <div id="player-bottom" class="player-bar">
+        <div class="player-id">
+          <span id="name-bottom" class="player-name">White</span>
+          <span class="thinking-dot" aria-hidden="true"></span>
+        </div>
+        <div id="captured-bottom" class="captured-row"></div>
+        <div id="clock-bottom" class="clock" hidden>5:00</div>
+      </div>
+
+      <div id="status" class="status" role="status">White to move</div>
+    </section>
+
+    <!-- ==================== sidebar ==================== -->
+    <aside class="sidebar">
+      <div id="engine-info" class="panel engine-panel"></div>
+
+      <div class="panel moves-panel">
+        <div class="panel-title">Moves</div>
+        <div id="move-list" class="move-list"></div>
+        <div class="history-nav">
+          <button id="btn-first" class="btn icon" title="First move (Home)" aria-label="First move">⏮</button>
+          <button id="btn-prev" class="btn icon" title="Previous move (←)" aria-label="Previous move">◀</button>
+          <button id="btn-next" class="btn icon" title="Next move (→)" aria-label="Next move">▶</button>
+          <button id="btn-last" class="btn icon" title="Last move (End)" aria-label="Last move">⏭</button>
+          <span class="nav-spacer"></span>
+          <button id="btn-undo" class="btn" title="Undo (u)">Undo</button>
+          <button id="btn-redo" class="btn" title="Redo (r)">Redo</button>
+        </div>
+      </div>
+
+      <div class="panel actions-panel">
+        <div class="actions-grid">
+          <button id="btn-flip" class="btn" title="Flip board (f)">Flip</button>
+          <button id="btn-restart" class="btn">Restart</button>
+          <button id="btn-hint" class="btn">Hint</button>
+          <button id="btn-pause" class="btn">⏯ AI</button>
+          <button id="btn-draw" class="btn">Offer draw</button>
+          <button id="btn-resign" class="btn danger">Resign</button>
+          <button id="btn-analyze" class="btn">Analyze</button>
+          <button id="btn-pgn" class="btn">PGN / FEN</button>
+          <button id="btn-save" class="btn">Save</button>
+          <button id="btn-load" class="btn">Load</button>
+          <button id="btn-export" class="btn">Export .pgn</button>
+        </div>
+      </div>
+
+      <div class="panel graph-panel">
+        <div class="panel-title">Evaluation graph</div>
+        <canvas id="eval-graph" class="eval-graph"></canvas>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ==================== modals ==================== -->
+  <div id="newgame-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>New game</h2>
+      <form>
+        <label class="field">
+          <span>Mode</span>
+          <select name="mode">
+            <option value="pvai">Player vs Computer</option>
+            <option value="pvp">Player vs Player</option>
+            <option value="aivai">Computer vs Computer</option>
+            <option value="practice">Practice (hints + free undo)</option>
+            <option value="puzzle">Puzzles</option>
+          </select>
+        </label>
+        <label class="field" data-row="difficulty">
+          <span>Difficulty</span>
+          <select name="difficulty">
+            <option value="easy">Easy (depth 1–2)</option>
+            <option value="medium">Medium (depth 3–4)</option>
+            <option value="hard">Hard (depth 5–6)</option>
+            <option value="expert">Expert (depth 7+)</option>
+          </select>
+        </label>
+        <label class="field" data-row="difficultyBlack">
+          <span>Black bot difficulty</span>
+          <select name="difficultyBlack">
+            <option value="easy">Easy (depth 1–2)</option>
+            <option value="medium">Medium (depth 3–4)</option>
+            <option value="hard">Hard (depth 5–6)</option>
+            <option value="expert">Expert (depth 7+)</option>
+          </select>
+        </label>
+        <label class="field" data-row="playerColor">
+          <span>Play as</span>
+          <select name="playerColor">
+            <option value="w">White</option>
+            <option value="b">Black</option>
+          </select>
+        </label>
+        <label class="field" data-row="puzzle">
+          <span>Puzzle</span>
+          <select name="puzzle"></select>
+        </label>
+        <label class="field" data-row="timeControl">
+          <span>Time control</span>
+          <select name="timeControl">
+            <option value="none">No clock</option>
+            <option value="3+2">Blitz 3 | 2</option>
+            <option value="5+0">Blitz 5 | 0</option>
+            <option value="10+0">Rapid 10 | 0</option>
+            <option value="15+10">Rapid 15 | 10</option>
+          </select>
+        </label>
+        <label class="field" data-label="whiteName">
+          <span>Your name</span>
+          <input name="whiteName" type="text" maxlength="24" placeholder="Player" />
+        </label>
+        <label class="field" data-label="blackName">
+          <span>Black player name</span>
+          <input name="blackName" type="text" maxlength="24" placeholder="Black" />
+        </label>
+        <label class="field checkbox" data-row="randomOpening">
+          <input name="randomOpening" type="checkbox" />
+          <span>Start from a random named opening</span>
+        </label>
+        <label class="field" data-row="startFen">
+          <span>Custom start position (FEN, optional)</span>
+          <input name="startFen" type="text" spellcheck="false" placeholder="Leave empty for the standard start" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn" data-action="cancel">Cancel</button>
+          <button type="submit" class="btn primary">Start game</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="promotion-modal" class="modal" hidden>
+    <div class="modal-card compact">
+      <h2>Promote to</h2>
+      <div class="promotion-row"></div>
+    </div>
+  </div>
+
+  <div id="gameover-modal" class="modal" hidden>
+    <div class="modal-card compact">
+      <h2 class="gameover-title">Game over</h2>
+      <p class="gameover-subtitle"></p>
+      <div class="modal-actions">
+        <button class="btn" data-action="close">Close</button>
+        <button class="btn" data-action="analyze">Analyze</button>
+        <button class="btn primary" data-action="rematch">Rematch</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="modal" hidden>
+    <div class="modal-card compact">
+      <h2 class="confirm-title">Confirm</h2>
+      <p class="confirm-message"></p>
+      <div class="modal-actions">
+        <button class="btn" data-action="no">Decline</button>
+        <button class="btn primary" data-action="yes">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pgn-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>PGN &amp; FEN</h2>
+      <label class="field">
+        <span>PGN</span>
+        <textarea id="pgn-text" rows="8" spellcheck="false"></textarea>
+      </label>
+      <div class="modal-actions left">
+        <button class="btn" data-action="copy-pgn">Copy PGN</button>
+        <button class="btn primary" data-action="import-pgn">Import PGN</button>
+      </div>
+      <label class="field">
+        <span>FEN (current position)</span>
+        <input id="fen-text" type="text" spellcheck="false" />
+      </label>
+      <div class="modal-actions left">
+        <button class="btn" data-action="copy-fen">Copy FEN</button>
+        <button class="btn primary" data-action="import-fen">Load FEN</button>
+      </div>
+      <p class="pgn-error"></p>
+      <div class="modal-actions">
+        <button class="btn" data-action="close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
