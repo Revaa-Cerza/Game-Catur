@@ -351,6 +351,11 @@
   font-size: 13px;
 }
 
+/* Keep mode-specific setup fields out of both the layout and tab order. */
+.field[hidden] {
+  display: none;
+}
+
 .field > span {
   color: var(--text-secondary);
   font-weight: 500;
